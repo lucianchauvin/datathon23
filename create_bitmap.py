@@ -5,6 +5,27 @@ import math
 BITMAP_SIZE = 256
 STROKE_RADIUS = 5
 
+def distance_line(x, y, start_point, end_point):
+    # find distance
+    line_vec = end_point - start_point
+    point_vec = np.array([x, y]) - start_point
+    projection = (point_vec @ line_vec) * line_vec / (line_vec @ line_vec)
+    point = projection + start_point
+
+    # check if point within the line segment
+    if point[0] < start_point[0]:
+        distance = math.sqrt(point_vec @ point_vec)
+    elif point[0] > end_point[0]:
+        distance = math.sqrt((end_point[0] - x) ** 2 + (end_point[1] - y) ** 2)
+    else:
+        # along the line
+        distance_vec = point_vec - projection
+        distance = math.sqrt(distance_vec @ distance_vec)
+
+    return distance
+
+
+
 def generate_bitmap(filename):
     for json_obj in get_data(filename):
         # create 2D array
@@ -41,58 +62,41 @@ def generate_bitmap(filename):
 
                 start_point = np.array([x1, y1])
                 end_point = np.array([x2, y2])
-                line_vec = end_point - start_point
-                for x in range(start_x, final_x):
+                for y in range(start_y, final_y):
+                    low = start_x
+                    high = final_x
+
+                    while low < high:
+                        mid = (low + high) // 2
+
+                        if distance_line(mid, y, start_point, end_point) <= STROKE_RADIUS:
+                            high = mid - 1
+                        else:
+                            low = mid + 1
+
+                    
                     prev_distance = 0
                     distance = 0
-                    for y in range(start_y, final_y):
-                        point_vec = np.array([x, y]) - start_point
+                    for x in range(low, final_x):
                         prev_distance = distance
-
-                        # find distance
-                        projection = (point_vec @ line_vec) * line_vec / (line_vec @ line_vec)
-                        point = projection + start_point
-
-                        # check if point within the line segment
-                        if point[0] < x1:
-                            distance = math.sqrt(point_vec @ point_vec)
-                        elif point[0] > x2:
-                            distance = math.sqrt((x2 - x) ** 2 + (y2 - y) ** 2)
-                        else:
-                            # along the line
-                            distance_vec = point_vec - projection
-                            distance = math.sqrt(distance_vec @ distance_vec)
-
+                        distance = distance_line(x, y, start_point, end_point)
                         if distance <= STROKE_RADIUS:
                             bitmap[y][x] = 0
                         elif prev_distance != 0 and distance > prev_distance:
                             break
-           
-                # m = (y2 - y1) / (x2 - x1)
-                # b = y1 - m * x1
-                # prev_y = y1
-                # for x in range(x1, x2 + 1):
-                #     y = round(m*x + b)
-                #    
-                #     bitmap[y][x] = 0
-                #
-                #     if abs(prev_y - y) > 1:
-                #         for inter_y in range(prev_y, y):
-                #             bitmap[inter_y][x] = 0
-                #
-                #     prev_y = y
-                #
 
         yield bitmap
 
 if __name__ == "__main__":
-    from matplotlib import pyplot as plt
+    # from matplotlib import pyplot as plt
     
     data_set = generate_bitmap("dataset/mushroom.ndjson")
     data = next(data_set)
     
-    plt.imshow(data, interpolation='nearest', cmap='gray', vmin=0, vmax=1)
-    plt.savefig('output_image.png')
+    # plt.imshow(data, interpolation='nearest', cmap='gray', vmin=0, vmax=1)
+    # plt.savefig('output_image.png')
+
+
     
 
                 
