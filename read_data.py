@@ -1,8 +1,8 @@
 import json
+from typing import Generator
 
-FILENAME = "dataset/aircraft carrier.ndjson"
 
-def get_data(filename):
+def get_data(filename: str) -> Generator:
     with open(filename, "r") as infile:
         for line in infile:
             line = line.rstrip()
@@ -12,4 +12,5 @@ def get_data(filename):
             yield jsonObj
 
 if __name__ == "__main__":
+    FILENAME = "dataset/aircraft carrier.ndjson"
     print(next(get_data(FILENAME)))
