@@ -1,36 +1,14 @@
 from read_data import get_data
 import numpy as np
-<<<<<<< HEAD
-import json
-=======
 import math
->>>>>>> c9b8e0866a227fad323c9cca8d2481df0f656dbb
 
 BITMAP_SIZE = 256
 STROKE_RADIUS = 5
 
-<<<<<<< HEAD
-
-def get_data(filename):
-    with open(filename, "r") as infile:
-        for line in infile:
-            line = line.rstrip()
-
-            jsonObj = json.loads(line)
-
-            yield jsonObj
-
-def generate_bitmap(filename):
-    ndjson_generator = get_data(filename)
-    for json_obj in ndjson_generator:
-        # create 2D array
-        bitmap = np.zeros((BITMAP_SIZE, BITMAP_SIZE), dtype=np.float_)
-=======
 def generate_bitmap(filename):
     for json_obj in get_data(filename):
         # create 2D array
         bitmap = np.ones((BITMAP_SIZE, BITMAP_SIZE), dtype=bool)
->>>>>>> c9b8e0866a227fad323c9cca8d2481df0f656dbb
 
         strokes = json_obj["drawing"]
 
@@ -44,24 +22,6 @@ def generate_bitmap(filename):
                 x1, y1 = x_vals[point_num], y_vals[point_num]
                 x2, y2 = x_vals[point_num + 1], y_vals[point_num + 1]
 
-<<<<<<< HEAD
-                if x1 == x2:
-                    for y in range(y1, y2, 2 * (x1 < x2) - 1):
-                        bitmap[y][x1] = 1
-                    continue
-
-                m = (y2 - y1) / (x2 - x1)
-                b = y1 - m * x1
-                prev_y = y1
-                for x in range(x1, x2 + 1, 2 * (x1 < x2) - 1):
-                    y = round(m*x + b)
-                    
-                    bitmap[y][x] = 1
-
-                    if abs(prev_y - y) > 1:
-                        for inter_y in range(prev_y, y, 2 * (x1 < x2) - 1):
-                            bitmap[inter_y][x] = 1
-=======
                 if x2 < x1:
                     x1, x2, y1, y2 = x2, x1, y2, y1
 
@@ -78,7 +38,6 @@ def generate_bitmap(filename):
                     start_y = 0
                 if final_y >= BITMAP_SIZE:
                     final_y = BITMAP_SIZE - 1
->>>>>>> c9b8e0866a227fad323c9cca8d2481df0f656dbb
 
                 start_point = np.array([x1, y1])
                 end_point = np.array([x2, y2])
