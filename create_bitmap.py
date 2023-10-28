@@ -1,11 +1,23 @@
 import numpy as np
+import json
 
 BITMAP_SIZE = 256
 
-def generate_bitmap(ndjson_generator):
+
+def get_data(filename):
+    with open(filename, "r") as infile:
+        for line in infile:
+            line = line.rstrip()
+
+            jsonObj = json.loads(line)
+
+            yield jsonObj
+
+def generate_bitmap(filename):
+    ndjson_generator = get_data(filename)
     for json_obj in ndjson_generator:
         # create 2D array
-        bitmap = np.ones((BITMAP_SIZE, BITMAP_SIZE), dtype=float)
+        bitmap = np.zeros((BITMAP_SIZE, BITMAP_SIZE), dtype=np.float_)
 
         strokes = json_obj["drawing"]
 
@@ -21,7 +33,7 @@ def generate_bitmap(ndjson_generator):
 
                 if x1 == x2:
                     for y in range(y1, y2, 2 * (x1 < x2) - 1):
-                        bitmap[y][x1] = 0
+                        bitmap[y][x1] = 1
                     continue
 
                 m = (y2 - y1) / (x2 - x1)
@@ -30,11 +42,11 @@ def generate_bitmap(ndjson_generator):
                 for x in range(x1, x2 + 1, 2 * (x1 < x2) - 1):
                     y = round(m*x + b)
                     
-                    bitmap[y][x] = 0
+                    bitmap[y][x] = 1
 
                     if abs(prev_y - y) > 1:
                         for inter_y in range(prev_y, y, 2 * (x1 < x2) - 1):
-                            bitmap[inter_y][x] = 0
+                            bitmap[inter_y][x] = 1
 
                     prev_y = y
 
