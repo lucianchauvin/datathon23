@@ -46,38 +46,19 @@ def generate_bitmap(filename):
                 if x2 < x1:
                     x1, x2, y1, y2 = x2, x1, y2, y1
 
-                start_x = x1 - STROKE_RADIUS
-                final_x = x2 + STROKE_RADIUS
-                start_y = (y1 if y1 < y2 else y2) - STROKE_RADIUS
-                final_y = (y2 if y1 < y2 else y1) + STROKE_RADIUS
-
-                if start_x < 0:
-                    start_x = 0
-                if final_x >= BITMAP_SIZE:
-                    final_x = BITMAP_SIZE - 1
-                if start_y < 0:
-                    start_y = 0
-                if final_y >= BITMAP_SIZE:
-                    final_y = BITMAP_SIZE - 1
+                start_x = max(x1 - STROKE_RADIUS, 0)
+                final_x = min(x2 + STROKE_RADIUS, BITMAP_SIZE - 1)
+                start_y = max((y1 if y1 < y2 else y2) - STROKE_RADIUS, 0)
+                final_y = min((y2 if y1 < y2 else y1) + STROKE_RADIUS, BITMAP_SIZE - 1)
 
                 start_point = np.array([x1, y1])
                 end_point = np.array([x2, y2])
+                
                 for y in range(start_y, final_y):
-                    low = start_x
-                    high = final_x
-
-                    while low < high:
-                        mid = (low + high) // 2
-
-                        if distance_line(mid, y, start_point, end_point) <= STROKE_RADIUS:
-                            high = mid - 1
-                        else:
-                            low = mid + 1
-
-                    
                     prev_distance = 0
                     distance = 0
-                    for x in range(low, final_x):
+
+                    for x in range(start_x, final_x):
                         prev_distance = distance
                         distance = distance_line(x, y, start_point, end_point)
                         if distance <= STROKE_RADIUS:
@@ -88,13 +69,13 @@ def generate_bitmap(filename):
         yield bitmap
 
 if __name__ == "__main__":
-    # from matplotlib import pyplot as plt
+    from matplotlib import pyplot as plt
     
     data_set = generate_bitmap("dataset/mushroom.ndjson")
     data = next(data_set)
     
-    # plt.imshow(data, interpolation='nearest', cmap='gray', vmin=0, vmax=1)
-    # plt.savefig('output_image.png')
+    plt.imshow(data, interpolation='nearest', cmap='gray', vmin=0, vmax=1)
+    plt.savefig('output_image.png')
 
 
     
